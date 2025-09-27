@@ -881,12 +881,12 @@ body.dark .password-toggle-btn:hover {
   /* Existing roles */
   .role-badge.employee {
     background-color: #e0f7fa;
-    color: #006064;
+    color: black;
   }
   
   .role-badge.admin {
     background-color: #ffebee;
-    color: #c62828;
+    color: black;
   }
   
   .role-badge.manager {
