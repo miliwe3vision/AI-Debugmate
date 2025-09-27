@@ -1,111 +1,216 @@
-import React, { useState, useEffect, createContext, } from 'react';
-import './App.css';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Header from './component/header';
-import "bootstrap/dist/css/bootstrap.min.css";
-import Sidebar from './component/Sidebar';
-import Communication from './pages/chatbot/Communication';
-import Dashboard from './pages/Dashboard';
-import Feedback from './pages/chatbot/feedback';
-import ChooseRole from './pages/Role-management/chooserole';
-import CreateMail from './pages/Role-management/createmail.js';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Button, Card, Badge, ProgressBar, Alert } from 'react-bootstrap';
+import { FiMoreHorizontal, FiPlus, FiCalendar, FiUsers, FiClock, FiUser, FiCode, FiFileText, FiRefreshCw, FiArrowUp } from 'react-icons/fi';
+import { Link, useLocation } from 'react-router-dom';
+import projectDatabaseSupabase from '../../services/projectDatabaseSupabase';
+import './Dashboard.css';
 
-import ChatbotIcon from './component/ChatbotIcon';
-import SignIn from './pages/Signin';
-import EmployeeProjectForm from './pages/project/project_info.js';
-import ApiManagement from './pages/Api_managment/Api_managment.js';
-import Overview from './pages/Overview/Overview.js';
-import Setting from './pages/Setting/setting.js';
-import ProjectDetailsTable from './pages/project/ProjectDetailsTable';
-import ProjectDetails from './pages/project/ProjectDetails';
-import WorkChat from './pages/chatbot/WorkChat.js';
-import DeveloperChat from './pages/chatbot/DeveloperChat';
-import DualChatbot from './pages/chatbot/DualChatbot';
+const StatCard = ({ value, title, icon }) => (
+  <div className="stat-card-custom d-flex flex-column align-items-center justify-content-center">
+    {icon && <div className="mb-2">{icon}</div>}
+    <div className="stat-value">{value}</div>
+    <div className="stat-title">{title}</div>
+  </div>
+);
 
-const MyContext = createContext();
-function App() {
-  const [istoggleSidebar, setIstoggleSidebar] = useState(false);
-  const [isSignIn, setIsSignIn] = useState(false);
-  const [ishideSidebar, setIshideSidebar] = useState(false);
-  const[istheme, setIstheme] = useState(true);
-  const [username, setUsername] = useState('');
-  const [userEmail, setUserEmail] = useState('');
- 
+const Dashboard = () => {
+  const location = useLocation();
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [stats, setStats] = useState({
+    openProjects: 0,
+    completedProjects: 0,
+    totalHours: 0
+  });
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Detect dark mode for color styling
   useEffect(() => {
-    if(istheme === true){
-      document.body.classList.remove('dark');
-      document.body.classList.add('light');
-      localStorage.setItem('theme', 'light');
-    }else{
-      document.body.classList.remove('light');
-      document.body.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
+    const checkDarkMode = () => setDarkMode(document.body.classList.contains('dark'));
+    checkDarkMode();
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  const fetchProjects = async (isRefresh = false) => {
+    try {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+      const projectsData = await projectDatabaseSupabase.getAllProjects();
+      setProjects(projectsData || []);
+      const openProjects = projectsData.filter(p => (p.status?.toLowerCase() !== 'completed')).length;
+      const completedProjects = projectsData.filter(p => (p.status?.toLowerCase() === 'completed')).length;
+      setStats({
+        openProjects,
+        completedProjects,
+        totalHours: projectsData.length * 8
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-  }, [istheme]);
+  };
 
-  const values={
-    istoggleSidebar,
-    setIstoggleSidebar,
-    isSignIn,
-    setIsSignIn,
-    ishideSidebar,
-    setIshideSidebar,
-    istheme,
-    setIstheme,
-    username,
-    setUsername,
-    userEmail,
-    setUserEmail
-  }
   useEffect(() => {
-    console.log(istoggleSidebar);
-  }, [istoggleSidebar]);
-  
-  return (
-    <BrowserRouter>
-    <MyContext.Provider value={values}>
-      {
-        ishideSidebar !== true &&
-        <Header />
-      }
-      <div className="main d-flex">
-        {
-          ishideSidebar !== true &&
-        <div className={`sidebarwrapper ${istoggleSidebar===true ? 'open' : ''}`}>
-          <Sidebar />
-        </div>
-        }
-        <div className={`content ${ishideSidebar===true && 'full'} ${istoggleSidebar===true ? 'open' : ''}`}>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/home" element={<Dashboard />} />
-            <Route path="/EmployeeProjectForm" element={<EmployeeProjectForm/>} />
-            <Route path="/project" element={<EmployeeProjectForm/>} />
-            <Route path="/chatbot/communication" element={<Communication />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/role-management/chooserole" element={<ChooseRole />} />
-            <Route path="/communication" element={<Communication />} />
-            <Route path="/chatbot/feedback" element={<Feedback />} />
-            <Route path="/role-management/createmail" element={<CreateMail />} />
+    fetchProjects();
+  }, []);
 
-            <Route path="/api-management" element={<ApiManagement />} />
-            <Route path="/overview" element={<Overview />} />
-            <Route path="/setting" element={<Setting />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/project/DetailsTable" element={<ProjectDetailsTable />} />
-            <Route path="/project/:id" element={<ProjectDetails />} />
-            <Route path="/chatbot" element={<WorkChat />} />
-            <Route path="/chatbot/WorkChat" element={<WorkChat />} />
-            <Route path="/chatbot/web" element={<DeveloperChat />} />
-            <Route path="/chatbot/dual" element={<DualChatbot />} />
-            
-          </Routes>
-        </div>
-      </div>
-      <ChatbotIcon />
-      </MyContext.Provider>
-    </BrowserRouter>
+  useEffect(() => {
+    if (location.state?.refreshProjects) {
+      fetchProjects();
+      setShowSuccessAlert(true);
+      window.history.replaceState({}, document.title);
+      setTimeout(() => setShowSuccessAlert(false), 5000);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    const dashboardContainer = document.querySelector('.dashboard-container');
+    const handleScroll = () => {
+      if (dashboardContainer) setShowScrollTop(dashboardContainer.scrollTop > 300);
+    };
+    if (dashboardContainer) {
+      dashboardContainer.addEventListener('scroll', handleScroll);
+      return () => dashboardContainer.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
+  const scrollToTop = () => {
+    const dashboardContainer = document.querySelector('.dashboard-container');
+    if (dashboardContainer) dashboardContainer.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Color backgrounds for cards based on theme
+  const getRandomCardColor = (index) => {
+    if (darkMode) {
+      const darkColors = [
+        "linear-gradient(135deg, #1a1a2e, #16213e, #0f3460, #533483)"
+      ];
+      return darkColors[index % darkColors.length];
+    } else {
+      const colors = ["#fff9c4", "#bbdefb", "#ffcdd2", "#c8e6c9", "#ffe0b2"];
+      return colors[index % colors.length];
+    }
+  };
+
+  // Format project date for the date tag shown on each card
+  const formatProjectDate = (project) => {
+    const rawDate = project?.createdAt || project?.created_at || project?.start_date || project?.startDate;
+    if (!rawDate) return '';
+    const d = new Date(rawDate);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleDateString(undefined, {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const filteredProjects = projects.filter(project => {
+    if(statusFilter === 'all') return true;
+    return (project.status || 'Not Started').toLowerCase() === statusFilter.toLowerCase();
+  });
+
+  return (
+    <Container fluid className="dashboard-container">
+      {showSuccessAlert && (
+        <Alert variant="success" onClose={() => setShowSuccessAlert(false)} dismissible className="mb-3">
+          <strong>Success!</strong> Your project has been created successfully and is now visible in the dashboard.
+        </Alert>
+      )}
+
+      <Row className="g-8 mb-4 justify-content-center">
+        <Col md={3} sm={6} xs={12}>
+          <StatCard value={stats.openProjects.toString()} title="Open Projects" />
+        </Col>
+        <Col md={3} sm={6} xs={12}>
+          <StatCard value={stats.completedProjects.toString()} title="Completed Projects" />
+        </Col>
+        <Col md={3} sm={6} xs={12}>
+          <StatCard value={stats.totalHours.toFixed(2)} title="Total Project Hours" />
+        </Col>
+      </Row>
+
+      <Row>
+        {loading ? (
+          <div className="text-center py-4">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        ) : filteredProjects.length === 0 ? (
+          <div className="text-center py-4 text-muted">
+            No projects found. Create your first project to get started.
+            <div className="d-flex justify-content-center gap-2 mt-3">
+              <Button variant="outline-primary" onClick={() => fetchProjects(true)} disabled={refreshing}>
+                <FiRefreshCw className={refreshing ? 'spinning me-2' : 'me-2'} />
+                {refreshing ? 'Refreshing...' : 'Refresh Projects'}
+              </Button>
+              <Link to="/project" className="btn btn-primary">
+                <FiPlus className="me-2" />
+                Create New Project
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="debug-section-card">
+            <div className="debug-header d-flex justify-content-between align-items-center mb-3">
+              <h6>All Projects ({filteredProjects.length})</h6>
+              <div className="d-flex align-items-center gap-3">
+                <select 
+                  className="status-dropdown" 
+                  value={statusFilter} 
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">All Status</option>
+                  <option value="not started">Not Started</option>
+                  <option value="in progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="on hold">On Hold</option>
+                </select>
+                <Link to="/project" className="btn btn-primary btn-sm d-flex align-items-center">
+                  <FiPlus className="me-2" />
+                  New Project
+                </Link>
+              </div>
+            </div>
+            <div className="debug-projects-grid">
+              {filteredProjects.map((project, index) => (
+                <Card 
+                  key={project.id} 
+                  className="project-card-custom mb-3"
+                  style={{background: getRandomCardColor(index), borderRadius: '12px'}}
+                >
+                  <Card.Body>
+                    <div className="date-tag mb-2">{formatProjectDate(project)}</div>
+                    <Card.Title className="project-title">{project.project_name || project.projectName}</Card.Title>
+                    <Card.Text className="project-desc">{project.project_description || project.projectDescription || 'No description available'}</Card.Text>
+                    <div className="btn-container">
+                      <Button as={Link} to={`/project/${project.id}`} variant="outline-secondary" size="sm" className="view-details-pill">View Details</Button>
+                      <Button as={Link} to="/chatbot/WorkChat" state={{ projectId: project.id, projectName: project.project_name || project.projectName }} variant="primary" size="sm" className="create-chat-btn">Create Chat</Button>
+                    </div>
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+      </Row>
+
+      {showScrollTop && (
+        <Button onClick={scrollToTop} className="scroll-to-top-btn" variant="primary" size="sm" title="Scroll to top">
+          <FiArrowUp />
+        </Button>
+      )}
+    </Container>
   );
-}
-export default App;
-export { MyContext };
+};
+
+export default Dashboard;
