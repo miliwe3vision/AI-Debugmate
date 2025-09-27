@@ -1,196 +1,325 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { FaPlus, FaSearch, FaEdit, FaTrash, FaCogs } from 'react-icons/fa';
 import './chooserole.css';
 import { databaseService } from '../../services/supabase';
-import { Alert } from 'react-bootstrap';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
-const modules = [
-  'Web Devlopment', 'Ar-Vr devlopment', 'Graphic Designer','AI Devlopment','SEO and Degital Marketing',
-];
-const actions = ['All', 'Index', 'Create', 'Edit', 'Delete'];
+const RoleList = () => {
+  const [roles, setRoles] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [editingRole, setEditingRole] = useState(null);
+  const [roleName, setRoleName] = useState('');
+  const [notice, setNotice] = useState(null);
+  const [noticeType, setNoticeType] = useState('success');
+  const [permissions, setPermissions] = useState({});
 
-const initialPermissions = modules.reduce((acc, module) => {
-  acc[module] = actions.reduce((a, action) => {
-    a[action] = false;
-    return a;
-  }, {});
-  return acc;
-}, {});
+  // Example permission pages
+  const pages = [
+    'Dashboard',
+    'Project Form',
+    'Project Description',
+    'ChatDual',
+    'Feedback',
+    'Create Mails',
+    'Choose Roles',
+    'Overview',
+    'profile Setting',
+    'API Management',
+  ];
 
-// Helper to filter only selected permissions
-const getSelectedPermissions = (permissions) => {
-  const filtered = {};
-  Object.keys(permissions).forEach(module => {
-    // If "All" is checked, only save "All": true for that module
-    if (permissions[module]['All']) {
-      filtered[module] = { All: true };
-    } else {
-      // Otherwise, only save checked actions (not "All")
-      const selected = {};
-      Object.keys(permissions[module]).forEach(action => {
-        if (action !== 'All' && permissions[module][action]) {
-          selected[action] = true;
-        }
-      });
-      if (Object.keys(selected).length > 0) {
-        filtered[module] = selected;
-      }
+  const actions = ['All', 'View', 'Insert', 'Update', 'Delete'];
+
+  // ✅ Fetch employees and extract roles
+  const fetchRoles = async () => {
+    const { data, error } = await databaseService.getAllUserLogins();
+    if (error) {
+      setNotice('Failed to load roles: ' + (error.message || 'Unknown error'));
+      setNoticeType('error');
+      return;
     }
-  });
-  return filtered;
-};
 
-const ChooseRoles = () => {
-  const [username, setUsername] = useState('');
-  const [permissions, setPermissions] = useState(initialPermissions);
-  const [allUsers, setAllUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [message, setMessage] = useState(null);
-  const [messageType, setMessageType] = useState('success');
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationText, setNotificationText] = useState('');
-  const [notificationType, setNotificationType] = useState('');
-  const notificationTimeout = useRef(null);
+    // Extract unique roles from employees
+    const uniqueRoles = [...new Set((data || []).map((u) => u.role || 'Employee'))].map(
+      (role, idx) => ({ id: idx + 1, name: role })
+    );
+
+    setRoles(uniqueRoles);
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const { data, error } = await databaseService.getAllUserLogins();
-      if (!error) setAllUsers(data);
-    };
-    fetchUsers();
+    fetchRoles();
   }, []);
 
-  useEffect(() => {
-    if (username) {
-      setFilteredUsers(allUsers.filter(u => u.name.toLowerCase().includes(username.toLowerCase())));
-      setShowDropdown(true);
-    } else {
-      setFilteredUsers([]);
-      setShowDropdown(false);
-    }
-  }, [username, allUsers]);
+  const filteredRoles = roles.filter((role) =>
+    role.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const handleDropdownSelect = (name) => {
-    setUsername(name);
-    setShowDropdown(false);
+  const handleAddNew = () => {
+    setEditingRole(null);
+    setRoleName('');
+    setShowModal(true);
   };
 
-  const handleCheckbox = (module, action) => {
-    setPermissions(prev => {
-      const updated = { ...prev };
-      updated[module] = { ...updated[module], [action]: !updated[module][action] };
-      if (action === 'All') {
-        const newValue = !prev[module]['All'];
-        actions.forEach(act => {
-          updated[module][act] = newValue;
-        });
-      } else {
-        const allChecked = actions.slice(1).every(act => act === action ? !prev[module][act] : updated[module][act]);
-        updated[module]['All'] = allChecked;
-        if (!updated[module][action]) {
-          updated[module]['All'] = false;
-        }
+  const handleEdit = (role) => {
+    setEditingRole(role);
+    setRoleName(role.name);
+    setShowModal(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this role?')) {
+      try {
+        const { error } = await databaseService.deleteRole(id);
+        if (error) throw error;
+        setNotice('Role deleted');
+        setNoticeType('success');
+        await fetchRoles();
+      } catch (err) {
+        setNotice('Delete failed: ' + (err.message || 'Unknown error'));
+        setNoticeType('error');
       }
-      return updated;
-    });
+    }
   };
 
-  const handleUsername = (e) => setUsername(e.target.value);
-
-  const showAnimatedNotification = (text, type = 'success') => {
-    setNotificationText(text);
-    setNotificationType(type);
-    setShowNotification(true);
-    if (notificationTimeout.current) clearTimeout(notificationTimeout.current);
-    notificationTimeout.current = setTimeout(() => setShowNotification(false), 2000);
-  };
-
-  const handleSave = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const user = allUsers.find(u => u.name === username);
-      if (!user) throw new Error('User not found');
-      const selectedPermissions = getSelectedPermissions(permissions);
-      const { error } = await databaseService.updateUserLoginByEmail(user.email, { permission_roles: selectedPermissions });
-      if (error) {
-        console.error('Supabase update error:', error);
-        showAnimatedNotification('Failed to update permissions: ' + error.message, 'error');
-        return;
+      if (editingRole) {
+        const { error } = await databaseService.updateRole(editingRole.id, { name: roleName });
+        if (error) throw error;
+        setNotice('Role updated successfully');
+        setNoticeType('success');
+      } else {
+        const { error } = await databaseService.createRole({ name: roleName });
+        if (error) throw error;
+        setNotice('Role created successfully');
+        setNoticeType('success');
       }
-      showAnimatedNotification('Permissions updated successfully!', 'success');
-    } catch (error) {
-      console.error('Update error:', error);
-      showAnimatedNotification('Failed to update permissions: ' + error.message, 'error');
+      await fetchRoles();
+      setShowModal(false);
+      setRoleName('');
+      setEditingRole(null);
+    } catch (err) {
+      setNotice('Save failed: ' + (err.message || 'Unknown error'));
+      setNoticeType('error');
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingRole(null);
+    setRoleName('');
+  };
+
+  // ✅ Open Permissions Modal
+  const handlePermissions = (role) => {
+    setEditingRole(role);
+
+    // Example: Load permissions (replace with DB fetch if needed)
+    const initialPermissions = {};
+    pages.forEach((page) => {
+      initialPermissions[page] = {};
+      actions.forEach((action) => {
+        initialPermissions[page][action] = false;
+      });
+    });
+    setPermissions(initialPermissions);
+    setShowPermissionModal(true);
+  };
+
+  // ✅ Toggle permission
+  const togglePermission = (page, action) => {
+    setPermissions((prev) => ({
+      ...prev,
+      [page]: {
+        ...prev[page],
+        [action]: !prev[page][action],
+      },
+    }));
+  };
+
+  const handleSavePermissions = async () => {
+    try {
+      // Save permissions for role
+      const { error } = await databaseService.updateRolePermissions(editingRole.name, permissions);
+      if (error) throw error;
+
+      setNotice('Permissions updated successfully');
+      setNoticeType('success');
+      setShowPermissionModal(false);
+    } catch (err) {
+      setNotice('Failed to update permissions: ' + (err.message || 'Unknown error'));
+      setNoticeType('error');
     }
   };
 
   return (
-    <div className="chooserole-container">
-      <ToastContainer />
-      <div style={{ position: 'absolute', top: 20, left: 0, right: 0, zIndex: 9999 }}>
-        {message && <Alert variant={messageType} className="text-center">{message}</Alert>}
-      </div>
-      <div className={`animated-notification${showNotification ? ' show' : ''}${notificationType === 'error' ? ' error' : ''}`}>
-        {notificationText}
-      </div>
-      <form className="chooserole-form" onSubmit={handleSave} autoComplete="off">
-        <label className="chooserole-label">Name</label>
-        <div style={{ position: 'relative' }}>
-          <input
-            className="chooserole-input"
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={handleUsername}
-            onFocus={() => setShowDropdown(true)}
-            required
-            autoComplete="off"
-          />
-          {showDropdown && filteredUsers.length > 0 && (
-            <div style={{ position: 'absolute', zIndex: 1000, background: '#fff', width: '100%', border: '1px solid #ccc', maxHeight: 150, overflowY: 'auto' }}>
-              {filteredUsers.map(u => (
-                <div key={u.email} style={{ padding: 8, cursor: 'pointer' }} onClick={() => handleDropdownSelect(u.name)}>
-                  {u.name}
-                </div>
-              ))}
-            </div>
-          )}
+    <div className="role-list-container">
+      {notice && (
+        <div className={`notice ${noticeType === 'error' ? 'error' : 'success'}`}>
+          {notice}
         </div>
-        <div className="chooserole-permissions">
-          <label className="chooserole-label">Permissions</label>
-          <div className="chooserole-table-wrapper">
-            <table className="chooserole-table table-responsive">
-              <thead>
-                <tr>
-                  <th>Roles</th>
-                  {actions.map(action => <th key={action}>{action}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                {modules.map(module => (
-                  <tr key={module}>
-                    <td>{module}</td>
-                    {actions.map(action => (
-                      <td key={action}>
-                        <input
-                          type="checkbox"
-                          checked={permissions[module][action]}
-                          onChange={() => handleCheckbox(module, action)}
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      )}
+
+      {/* Header Section */}
+      <div className="role-header">
+        <div className="header-content">
+          <h1 className="page-title">Roles List</h1>
+          <div className="header-actions">
+            <button className="add-role-btn" onClick={handleAddNew}>
+              <FaPlus className="btn-icon" />
+              Add New Role
+            </button>
+            <div className="search-container">
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
           </div>
         </div>
-        <button className="chooserole-save" type="submit">Save</button>
-      </form>
+      </div>
+
+      {/* Roles Table */}
+      <div className="table-container">
+        <div className="table-wrapper">
+          <table className="role-table">
+            <thead>
+              <tr>
+                <th>Sr No.</th>
+                <th>Role Name</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRoles.map((role, index) => (
+                <tr key={role.id}>
+                  <td className="role-number">{index + 1}</td>
+                  <td className="role-name">{role.name}</td>
+                  <td className="role-actions">
+                    <div className="action-buttons">
+                      <button
+                        className="edit-btn"
+                        onClick={() => handleEdit(role)}
+                        title="Edit Role"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        className="edit-btn"
+                        title="Permissions"
+                        onClick={() => handlePermissions(role)}
+                      >
+                        <FaCogs />
+                      </button>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(role.id)}
+                        title="Delete Role"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modal for Add/Edit Role */}
+      {showModal && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{editingRole ? 'Edit Role' : 'Add New Role'}</h2>
+              <button className="close-btn" onClick={closeModal}>
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="role-form">
+              <div className="form-group">
+                <label>Role Name</label>
+                <input
+                  type="text"
+                  value={roleName}
+                  onChange={(e) => setRoleName(e.target.value)}
+                  required
+                  placeholder="Enter role name"
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="button" className="cancel-btn" onClick={closeModal}>
+                  Cancel
+                </button>
+                <button type="submit" className="save-btn">
+                  {editingRole ? 'Update' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Permissions Modal */}
+      {showPermissionModal && (
+        <div className="modal-overlay" onClick={() => setShowPermissionModal(false)}>
+          <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Update Role Permission</h2>
+              <button className="close-btn" onClick={() => setShowPermissionModal(false)}>
+                ×
+              </button>
+            </div>
+            <div className="permission-table-wrapper">
+              <table className="permission-table">
+                <thead>
+                  <tr>
+                    <th>Page Name</th>
+                    {actions.map((action) => (
+                      <th key={action}>{action}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {pages.map((page) => (
+                    <tr key={page}>
+                      <td>{page}</td>
+                      {actions.map((action) => (
+                        <td key={action}>
+                          <input
+                            type="checkbox"
+                            checked={permissions[page]?.[action] || false}
+                            onChange={() => togglePermission(page, action)}
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="form-actions">
+              <button className="cancel-btn" onClick={() => setShowPermissionModal(false)}>
+                Close
+              </button>
+              <button className="save-btn" onClick={handleSavePermissions}>
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default ChooseRoles;
+export default RoleList;
