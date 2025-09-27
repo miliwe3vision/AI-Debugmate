@@ -126,15 +126,13 @@ p {
     header .part3 {
         flex: 1 1 auto;
     }
-    .main .content{
-        padding-left: 0;
-    }
+/* 
     .main .sidebarwrapper{
         left: -280px;
     }
     .main .sidebarwrapper.open{
         left:0;
-    }
+    } */
 }
 
 
