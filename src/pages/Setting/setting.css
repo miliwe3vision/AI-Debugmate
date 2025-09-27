@@ -6,7 +6,6 @@
   margin: 0 auto;
   min-height: calc(100vh - 80px);
   /* Light theme background */
-  background: #ffffffd9;
 }
 
 .settings-header {
@@ -43,13 +42,7 @@
 }
 
 /* Settings Sidebar */
-.settings-sidebar {
-  background: var(--bg-secondary, #f9fafb);
-  border-right: 1px solid var(--border-color, #e5e7eb);
-  padding: 24px 0;
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
-}
+
 
 
 
@@ -116,7 +109,7 @@
 /* Settings Content */
 .settings-content {
   padding: 32px;
-  background: var(--bg-primary, #ffffff);
+  /* background: var(--bg-primary, #ffffff); */
   max-height: calc(100vh - 120px);
   overflow-y: auto;
 }
@@ -240,7 +233,7 @@ body.dark .settings-content::-webkit-scrollbar-track {
   border: 2px solid #babec6;
   border-radius: 8px;
   font-size: 14px;
-  background: #e0e0e0;
+  background: #e0e0e085;
   color: black;
   transition: all 0.3s ease;
 }
