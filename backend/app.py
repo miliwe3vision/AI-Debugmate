@@ -53,6 +53,35 @@ OUTRO_LINES = [
     "📌 Let me know if you’d like me to expand on any section.",
     "✨ I can also share related project notes if you want."
 ]
+
+
+
+# ================== Acknowledgment / Tone Enhancer ==================
+ACK_WORDS = [
+    "ok", "okay", "hmm", "sure", "great", "alright",
+    "cool", "nice", "got it", "perfect", "yeah", "right"
+]
+
+def enhance_with_ack(response: str) -> str:
+    """
+    Randomly adds small natural acknowledgment words at the start
+    of chatbot responses (to sound more human and interactive).
+    """
+    import random
+
+    # Avoid adding for very short or question-type replies
+    if not response or len(response) < 20 or response.strip().endswith("?"):
+        return response
+
+    # Random chance (40%) to include an acknowledgment
+    if random.random() < 0.4:
+        ack = random.choice(ACK_WORDS)
+        # Capitalize if needed
+        if ack[0].isalpha():
+            ack = ack[0].upper() + ack[1:]
+        return f"{ack}, {response}"
+    return response
+
 # ---------------- Persistent Chat Memory ----------------
 def get_user_id(email: str) -> str | None:
     """Fetch user id from Supabase using email."""
@@ -1443,6 +1472,7 @@ Respond conversationally, clear, concise (3–4 line summaries)."""
         # 5. LLM response
         # -------------------------------
         reply = call_openrouter(messages, temperature=0.6, max_tokens=1200) or "⚠️ No response."
+        reply = enhance_with_ack(reply)
 
         # -------------------------------
         # 6. Save chat + memory
@@ -1555,6 +1585,7 @@ def work_chat():
         ]
 
         reply = call_openrouter(messages, temperature=0.5, max_tokens=350)
+        reply = enhance_with_ack(reply)
 
         # -------------------- Save Chat & Memory --------------------
         remember(user_email, user_input)
