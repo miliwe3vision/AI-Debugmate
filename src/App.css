@@ -51,7 +51,7 @@ header button.rounded-circle svg{width: 30px; height: 30px; color: #000; transit
 .btn-rounded{border-radius: 30px!important;}
 .myacc-btn{margin: 5px!important; font-size: 14px; font-weight: 600; transition: all 0.3s ease-in-out;}
 
-.main .content{ background: #f8f9faf8; width: 100%; padding-left: 280px;transition: all 0.3s ease-in-out; padding-bottom: 100px; box-sizing: border-box;}
+.main .content{  width: 100%; padding-left: 280px;transition: all 0.3s ease-in-out; padding-bottom: 100px; box-sizing: border-box;}
 .main .content.open{padding-left: 0;}
 .main .sidebarwrapper{ background: #ffffff;width: 280px; position: fixed; left:0; top:70px; height: 100vh; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08); transition: all 0.3s ease-in-out;}
 .main .sidebarwrapper.open{left: -280px;}
@@ -60,8 +60,9 @@ header button.rounded-circle svg{width: 30px; height: 30px; color: #000; transit
 
 .main .sidebarwrapper .sidebar ul{padding-left: 0px;margin-left: 8px;margin-bottom: 0px;}
 .main .sidebarwrapper .sidebar ul li{margin-bottom: 0px; list-style: none;}
-.main .sidebarwrapper .sidebar ul li button{width: 100%; text-align: left; justify-content: flex-start;align-items: center; padding: 10px 15px; border-radius: 0px; background: transparent; border: none; outline: none; box-shadow: none; font-size: 15px; font-weight: 600; color: #000; transition: all 0.3s ease-in-out;justify-content: space-around;}
+.main .sidebarwrapper .sidebar ul li button{width: 100%; text-align: left; justify-content: flex-start;align-items: center;margin-top: 10px; border-radius: 0px; background: transparent; border: none; outline: none; box-shadow: none; font-size: 15px; font-weight: 600; color: #000; transition: all 0.3s ease-in-out;justify-content: space-around;}
 .main .sidebarwrapper .sidebar ul li button:hover{background: linear-gradient(135deg, #A80C4C, #090939, #421256, #531C9B); color: #fff;border-radius: 5px;height: 50px;}
+.main .sidebarwrapper .sidebar ul li button.active{background: linear-gradient(135deg, #A80C4C, #090939, #421256, #531C9B); color: #fff;border-radius: 5px;height: 50px;}
 .main .sidebarwrapper .sidebar ul li button .text{margin-left: 10px;margin-top: 10px;}
 .main .sidebarwrapper .sidebar ul li button .icon{width: 20px; height: 20px; border-radius: 50%;display: inline-block;margin-right: 10px;justify-content: center;align-items: center;}
 .main .sidebarwrapper .sidebar ul li button .icon svg{width: 100%; height: 100%;opacity: 0.7;font-size: 16px  ;}
@@ -77,7 +78,7 @@ header button.rounded-circle svg{width: 30px; height: 30px; color: #000; transit
 .main .sidebarwrapper .sidebar ul .sub-menu li a .text{margin-left: 10px;margin-top: 10px;}
 .main .sidebarwrapper .sidebar ul .sub-menu li a .arrow{width: 20px; height: 20px; border-radius: 50%;display: inline-block;margin-left: auto;justify-content: center;align-items: center;transition: all 0.3s ease-in-out;}
 .main .sidebarwrapper .sidebar ul .sub-menu li a .arrow svg{width: 100%; height: 100%;font-size: 16px;opacity: 0.7;}
-.main .sidebarwrapper .sidebar ul li button.active .arrow{transform: rotate(90deg);}
+.main .sidebarwrapper .sidebar ul li button.active .arrow1{transform: rotate(90deg);}
 
 .main .sidebarwrapper .sidebar ul .submenuwrapper{display: none;transition: all 0.3s ease-in-out;}
 .main .sidebarwrapper .sidebar ul .submenuwrapper.colapse{display: block;}
