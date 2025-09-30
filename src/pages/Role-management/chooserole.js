@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+// chooserole.js
+import React, { useState, useEffect, useContext } from 'react';
 import { FaPlus, FaSearch, FaEdit, FaTrash, FaCogs } from 'react-icons/fa';
 import './chooserole.css';
 import { databaseService } from '../../services/supabase';
+import { MyContext } from '../../App';
 
 const RoleList = () => {
+  const { userRole, userPermissions } = useContext(MyContext);
+
   const [roles, setRoles] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -30,7 +34,17 @@ const RoleList = () => {
 
   const actions = ['All', 'View', 'Insert', 'Update', 'Delete'];
 
-  // ✅ Fetch employees and extract roles
+  // helper: check permission for current user
+  const hasPermission = (page, action = 'View') => {
+    if (userRole === 'Admin') return true;
+    if (!userPermissions) return false;
+    const pagePerms = userPermissions[page];
+    if (!pagePerms) return false;
+    if (pagePerms['All']) return true;
+    return !!pagePerms[action];
+  };
+
+  // Fetch roles
   const fetchRoles = async () => {
     const { data, error } = await databaseService.getAllUserLogins();
     if (error) {
@@ -39,7 +53,6 @@ const RoleList = () => {
       return;
     }
 
-    // Extract unique roles from employees
     const uniqueRoles = [...new Set((data || []).map((u) => u.role || 'Employee'))].map(
       (role, idx) => ({ id: idx + 1, name: role })
     );
@@ -49,6 +62,7 @@ const RoleList = () => {
 
   useEffect(() => {
     fetchRoles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filteredRoles = roles.filter((role) =>
@@ -112,11 +126,10 @@ const RoleList = () => {
     setRoleName('');
   };
 
-  // ✅ Open Permissions Modal
   const handlePermissions = (role) => {
     setEditingRole(role);
 
-    // Example: Load permissions (replace with DB fetch if needed)
+    // Load default permissions structure
     const initialPermissions = {};
     pages.forEach((page) => {
       initialPermissions[page] = {};
@@ -128,7 +141,6 @@ const RoleList = () => {
     setShowPermissionModal(true);
   };
 
-  // ✅ Toggle permission
   const togglePermission = (page, action) => {
     setPermissions((prev) => ({
       ...prev,
@@ -141,7 +153,6 @@ const RoleList = () => {
 
   const handleSavePermissions = async () => {
     try {
-      // Save permissions for role
       const { error } = await databaseService.updateRolePermissions(editingRole.name, permissions);
       if (error) throw error;
 
@@ -162,15 +173,18 @@ const RoleList = () => {
         </div>
       )}
 
-      {/* Header Section */}
       <div className="role-header">
         <div className="header-content">
           <h1 className="page-title">Roles List</h1>
           <div className="header-actions">
-            <button className="add-role-btn" onClick={handleAddNew}>
-              <FaPlus className="btn-icon" />
-              Add New Role
-            </button>
+            {/* Only show Add if user has Insert permission on 'Choose Roles' or Admin */}
+            {hasPermission('Choose Roles', 'Insert') && (
+              <button className="add-role-btn" onClick={handleAddNew}>
+                <FaPlus className="btn-icon" />
+                Add New Role
+              </button>
+            )}
+
             <div className="search-container">
               <FaSearch className="search-icon" />
               <input
@@ -185,7 +199,6 @@ const RoleList = () => {
         </div>
       </div>
 
-      {/* Roles Table */}
       <div className="table-container">
         <div className="table-wrapper">
           <table className="role-table">
@@ -203,31 +216,50 @@ const RoleList = () => {
                   <td className="role-name">{role.name}</td>
                   <td className="role-actions">
                     <div className="action-buttons">
-                      <button
-                        className="edit-btn"
-                        onClick={() => handleEdit(role)}
-                        title="Edit Role"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        className="edit-btn"
-                        title="Permissions"
-                        onClick={() => handlePermissions(role)}
-                      >
-                        <FaCogs />
-                      </button>
-                      <button
-                        className="delete-btn"
-                        onClick={() => handleDelete(role.id)}
-                        title="Delete Role"
-                      >
-                        <FaTrash />
-                      </button>
+                      {/* Edit allowed if Update permission */}
+                      {hasPermission('Choose Roles', 'Update') ? (
+                        <button
+                          className="edit-btn"
+                          onClick={() => handleEdit(role)}
+                          title="Edit Role"
+                        >
+                          <FaEdit />
+                        </button>
+                      ) : null}
+
+                      {/* Permissions allowed if Update permission */}
+                      {hasPermission('Choose Roles', 'Update') ? (
+                        <button
+                          className="edit-btn"
+                          title="Permissions"
+                          onClick={() => handlePermissions(role)}
+                        >
+                          <FaCogs />
+                        </button>
+                      ) : null}
+
+                      {/* Delete allowed if Delete permission */}
+                      {hasPermission('Choose Roles', 'Delete') ? (
+                        <button
+                          className="delete-btn"
+                          onClick={() => handleDelete(role.id)}
+                          title="Delete Role"
+                        >
+                          <FaTrash />
+                        </button>
+                      ) : null}
                     </div>
                   </td>
                 </tr>
               ))}
+
+              {filteredRoles.length === 0 && (
+                <tr>
+                  <td colSpan="3" style={{ textAlign: 'center', padding: '24px' }}>
+                    No roles found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
