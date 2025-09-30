@@ -1,3 +1,4 @@
+// index.js (SignIn)
 import React, { useEffect, useState } from 'react';
 import logo from '../../assets/images/logo.png';
 import { useContext } from 'react';
@@ -43,10 +44,14 @@ const SignIn = () => {
                 setError('Incorrect password.');
                 return;
             }
-            // 3. Proceed with Supabase Auth signIn
+            // 3. Proceed with sign in local state/context
             if (context.setIsSignIn) context.setIsSignIn(true);
             if (context.setUsername) context.setUsername(userPerm.name); // for header
             if (context.setUserEmail) context.setUserEmail(email);
+
+            // NEW: set role & permissions
+            if (context.setUserRole) context.setUserRole(userPerm.role || 'Employee');
+            if (context.setUserPermissions) context.setUserPermissions(userPerm.permission_roles || {});
 
             // 🔗 Migrate guest chat history to logged-in user
             try {
