@@ -134,7 +134,7 @@ body.dark .typing-indicator { background: #2a2a3e; }
   align-items: center;
   gap: 12px;
   padding: 12px 24px;
-  background: #fff;
+  /* background: #fff; */
   backdrop-filter: blur(20px);
   border-top: 1px solid #e9ecef;
 }
@@ -511,7 +511,7 @@ body.dark .typing-indicator { background: #2a2a3e; }
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1001;
+    z-index: 1000;
     border-left: none;
     border-top: 1px solid #dee2e6;
   }
@@ -521,13 +521,18 @@ body.dark .typing-indicator { background: #2a2a3e; }
   }
   
   .dual-history-toggle-btn {
+    top: 19%!important;
+    bottom: 80px; /* sits above input/footer */
     right: 20px;
-    top: 80px;
     transform: none;
-    width: 48px;
-    height: 48px;
-    font-size: 18px;
+    width: 45px;
+    height: 45px;
+    font-size: 15px;
   }
+    .dual-layout.dark-mode .dual-history-toggle-btn:hover {
+      transform: scale(1.15);
+    }
+  
   
   .dual-container.with-history {
     margin-right: 0;
@@ -539,7 +544,7 @@ body.dark .typing-indicator { background: #2a2a3e; }
   
   .dual-panel-header {
     padding: 16px;
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    margin-top: 100px;
   }
   
   .dual-panel-header h3 {
@@ -622,11 +627,12 @@ body.dark .typing-indicator { background: #2a2a3e; }
 /* Mobile Small */
 @media (max-width: 480px) {
   .dual-layout {
-    margin-top: 50px;
     padding: 25px;
-    min-height: 75vh;
+    min-height: 85vh;
   }
-  
+  .dual-input-area{
+    padding: 0px;
+  }
   .dual-container {
     margin-bottom: 20px;
   }
@@ -674,6 +680,10 @@ body.dark .typing-indicator { background: #2a2a3e; }
   .dual-history-delete-btn {
     padding: 3px 6px;
     font-size: 11px;
+  }
+  .send-btn{
+    height: 35px;
+    width: 45px;
   }
 }
 
@@ -1067,3 +1077,14 @@ body.dark .typing-indicator { background: #2a2a3e; }
   background: linear-gradient(135deg, #6d28d9, #9333ea, #2563eb);
 }
 
+@media (max-width: 767px) {
+  .dual-history-toggle-btn {
+    top: auto;
+    bottom: 80px; /* sits above input/footer */
+    right: 20px;
+    transform: none;
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+}
