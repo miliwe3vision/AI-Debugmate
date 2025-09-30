@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+// createmail.js
+import React, { useState, useEffect, useContext } from 'react';
 import { FaPlus, FaSearch, FaEdit, FaTrash, FaUser, FaEnvelope, FaLock, FaUserTag, FaEye, FaEyeSlash } from 'react-icons/fa';
 import './createmail.css';
 import { databaseService } from '../../services/supabase';
+import { MyContext } from '../../App';
 
 const EmployeeList = () => {
+    const { userRole, userPermissions } = useContext(MyContext);
+
     const [employees, setEmployees] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
@@ -18,6 +22,16 @@ const EmployeeList = () => {
     const [visiblePasswords, setVisiblePasswords] = useState({});
     const [notice, setNotice] = useState(null);
     const [noticeType, setNoticeType] = useState('success');
+
+    // helper: check permission for 'Create Mails' page
+    const hasPermission = (action = 'View') => {
+        if (userRole === 'Admin') return true;
+        if (!userPermissions) return false;
+        const pagePerms = userPermissions['Create Mails'];
+        if (!pagePerms) return false;
+        if (pagePerms['All']) return true;
+        return !!pagePerms[action];
+    };
 
     const fetchEmployees = async () => {
         const { data, error } = await databaseService.getAllUserLogins();
@@ -37,8 +51,13 @@ const EmployeeList = () => {
     };
 
     useEffect(() => {
-        fetchEmployees();
-    }, []);
+        if (hasPermission('View')) {
+            fetchEmployees();
+        } else {
+            setEmployees([]); // clear if not allowed
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userPermissions, userRole]);
 
     const filteredEmployees = employees.filter(employee =>
         employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -59,6 +78,12 @@ const EmployeeList = () => {
         setIsLoading(true);
 
         try {
+            if (!hasPermission(editingEmployee ? 'Update' : 'Insert')) {
+                setNotice('You do not have permission to perform this action.');
+                setNoticeType('error');
+                return;
+            }
+
             if (editingEmployee) {
                 const updates = { name: formData.name, role: formData.role };
                 if (formData.password && formData.password.trim().length > 0) {
@@ -94,6 +119,11 @@ const EmployeeList = () => {
     };
 
     const handleEdit = (employee) => {
+        if (!hasPermission('Update')) {
+            setNotice('You do not have permission to edit employees.');
+            setNoticeType('error');
+            return;
+        }
         setEditingEmployee(employee);
         setFormData({
             name: employee.name,
@@ -107,6 +137,11 @@ const EmployeeList = () => {
     const handleDelete = async (id) => {
         const employee = employees.find(e => e.id === id);
         if (!employee) return;
+        if (!hasPermission('Delete')) {
+            setNotice('You do not have permission to delete employees.');
+            setNoticeType('error');
+            return;
+        }
         if (window.confirm('Are you sure you want to delete this employee?')) {
             try {
                 const { error } = await databaseService.deleteUserLoginByEmail(employee.email);
@@ -122,6 +157,11 @@ const EmployeeList = () => {
     };
 
     const handleAddNew = () => {
+        if (!hasPermission('Insert')) {
+            setNotice('You do not have permission to add employees.');
+            setNoticeType('error');
+            return;
+        }
         setEditingEmployee(null);
         setFormData({ name: '', email: '', password: '', role: 'Employee' });
         setShowModal(true);
@@ -155,13 +195,17 @@ const EmployeeList = () => {
                 <div className="header-content">
                     <h1 className="page-title">Employee List</h1>
                     <div className="header-actions">
-                        <button 
-                            className="add-employee-btn"
-                            onClick={handleAddNew}
-                        >
-                            <FaPlus className="btn-icon" />
-                            New Employee
-                        </button>
+                        {/* Show add button only if user has Insert */}
+                        {hasPermission('Insert') && (
+                            <button 
+                                className="add-employee-btn"
+                                onClick={handleAddNew}
+                            >
+                                <FaPlus className="btn-icon" />
+                                New Employee
+                            </button>
+                        )}
+
                         <div className="search-container">
                             <FaSearch className="search-icon" />
                             <input
@@ -232,24 +276,38 @@ const EmployeeList = () => {
                                     </td>
                                     <td className="employee-actions">
                                         <div className="action-buttons">
-                                            <button 
-                                                className="edit-btn"
-                                                onClick={() => handleEdit(employee)}
-                                                title="Edit Employee"
-                                            >
-                                                <FaEdit />
-                                            </button>
-                                            <button 
-                                                className="delete-btn"
-                                                onClick={() => handleDelete(employee.id)}
-                                                title="Delete Employee"
-                                            >
-                                                <FaTrash />
-                                            </button>
+                                            {/* Edit button appears only if Update permission */}
+                                            {hasPermission('Update') && (
+                                                <button 
+                                                    className="edit-btn"
+                                                    onClick={() => handleEdit(employee)}
+                                                    title="Edit Employee"
+                                                >
+                                                    <FaEdit />
+                                                </button>
+                                            )}
+                                            {/* Delete button appears only if Delete permission */}
+                                            {hasPermission('Delete') && (
+                                                <button 
+                                                    className="delete-btn"
+                                                    onClick={() => handleDelete(employee.id)}
+                                                    title="Delete Employee"
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
                             ))}
+
+                            {filteredEmployees.length === 0 && (
+                                <tr>
+                                    <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+                                        {hasPermission('View') ? 'No employees found.' : 'You do not have permission to view employees.'}
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -329,7 +387,7 @@ const EmployeeList = () => {
                                     <option value="Employee">Employee</option>
                                     <option value="Admin">Admin</option>
                                     <option value="Manager">Manager</option>
-                                    <option value="Project Manager">Project Manager</option> {/* ✅ Added */}
+                                    <option value="Project Manager">Project Manager</option>
                                 </select>
                             </div>
                 
