@@ -11,7 +11,7 @@ body {
   background: #ffffffd9;
 
 }
-header{width: 100%; height: 70px; background: #e0e7ff; position: fixed; top: 0; left: 0; z-index: 1000; box-shadow: 0 2px 16px 0 rgba(31, 38, 135, 0.08);}
+header{width: 100%; height: 70px; background: #e0e7ff; position: fixed; top: 0; left: 0; z-index: 2000; box-shadow: 0 2px 16px 0 rgba(31, 38, 135, 0.08);}
 header .row{margin: 0px !important;}
 header .logo{text-decoration: none;}
 header .logo img{height: 40px; width: 45px; border-radius: 50%;}
