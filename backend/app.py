@@ -104,7 +104,8 @@ def save_chat_message(user_email: str, role: str, content: str, keep_limit: int 
             "user_id": user_id,
             "role": role,
             "content": content,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(datetime.UTC).isoformat()
+
         }).execute()
 
         # Trim old messages if more than keep_limit
@@ -1269,7 +1270,8 @@ def call_openrouter(messages, model='openai/gpt-4o-mini', temperature=0.5, max_t
         "max_tokens": max_tokens
     }
     try:
-        resp = requests.post(url, headers=headers, json=payload, timeout=30)
+        resp = requests.post(url, headers=headers, json=payload, timeout=90)
+
         data = resp.json()
         if resp.status_code != 200:
             print("OpenRouter error:", resp.status_code, data)
