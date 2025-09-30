@@ -1,3 +1,4 @@
+// App.js
 import React, { useState, useEffect, createContext, } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -21,6 +22,7 @@ import ProjectDetails from './pages/project/ProjectDetails';
 import WorkChat from './pages/chatbot/WorkChat.js';
 import DeveloperChat from './pages/chatbot/DeveloperChat';
 import DualChatbot from './pages/chatbot/DualChatbot';
+import ProtectedRoute from './component/ProtectedRoute'; // new protected route
 
 const MyContext = createContext();
 function App() {
@@ -30,7 +32,11 @@ function App() {
   const[istheme, setIstheme] = useState(true);
   const [username, setUsername] = useState('');
   const [userEmail, setUserEmail] = useState('');
- 
+
+  // RBAC additions
+  const [userRole, setUserRole] = useState('Guest'); // 'Admin'/'Manager'/'Employee' etc
+  const [userPermissions, setUserPermissions] = useState({}); // permissions structure loaded on login
+
   useEffect(() => {
     if(istheme === true){
       document.body.classList.remove('dark');
@@ -55,7 +61,12 @@ function App() {
     username,
     setUsername,
     userEmail,
-    setUserEmail
+    setUserEmail,
+    // RBAC values
+    userRole,
+    setUserRole,
+    userPermissions,
+    setUserPermissions,
   }
   useEffect(() => {
     console.log(istoggleSidebar);
@@ -77,16 +88,31 @@ function App() {
         }
         <div className={`content ${ishideSidebar===true && 'full'} ${istoggleSidebar===true ? 'open' : ''}`}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/home" element={<Dashboard />} />
+            <Route path="/" element={<SignIn />} />
+            <Route path="/home" element={<SignIn />} />
             <Route path="/EmployeeProjectForm" element={<EmployeeProjectForm/>} />
             <Route path="/project" element={<EmployeeProjectForm/>} />
             <Route path="/chatbot/communication" element={<Communication />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/role-management/chooserole" element={<ChooseRole />} />
+            {/* Protect role management routes: only Admin or roles with 'Choose Roles' permission */}
+            <Route
+              path="/role-management/chooserole"
+              element={
+                <ProtectedRoute requiredPage="Choose Roles">
+                  <ChooseRole />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/communication" element={<Communication />} />
             <Route path="/chatbot/feedback" element={<Feedback />} />
-            <Route path="/role-management/createmail" element={<CreateMail />} />
+            <Route
+              path="/role-management/createmail"
+              element={
+                <ProtectedRoute requiredPage="Create Mails">
+                  <CreateMail />
+                </ProtectedRoute>
+              }
+            />
 
             <Route path="/api-management" element={<ApiManagement />} />
             <Route path="/overview" element={<Overview />} />
