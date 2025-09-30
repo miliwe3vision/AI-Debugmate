@@ -100,14 +100,14 @@ body{
     scroll-behavior: smooth;
 }
 .stat-card-custom {
- 
     border-radius: 20px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
     /* padding: 2.5rem 1.5rem; */
     min-height: 160px;
     min-width: 180px;
     margin-bottom: 1rem;
     text-align: center;
+    background-color:  white;
+    box-shadow: 8px 9px 12px rgba(0, 0, 0, 0.1);
   }
   .stat-value {
     font-size: 2.2rem;
@@ -981,10 +981,14 @@ body.dark .project-card-custom .badge {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background-color: #000000;
+  border-radius: 10px;
 }
 
 .status-dropdown:active {
   transform: translateY(0) !important;
+  background-color: #000000;
+  border-radius: 10px;
 }
 
 /* Dark Mode Debug Projects Grid */
@@ -1129,9 +1133,17 @@ body.dark .status-dropdown {
 }
 
 body.dark .status-dropdown:hover {
-  background: linear-gradient(135deg, #A80C4C, #090939, #421256, #531C9B) !important;
+  background: black;
   transform: translateY(-2px) !important;
   box-shadow: 0 6px 16px rgba(124, 58, 237, 0.5) !important;
+}
+body.dark .status-dropdown:focus {
+  background-color: black;
+  color: white;
+}
+body.dark .status-dropdown:active {
+  background-color: black;
+  color: white;
 }
 
 body.dark .new-project-btn {
