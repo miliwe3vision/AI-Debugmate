@@ -1,8 +1,112 @@
 import React from "react";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
-import { FiUsers, FiSettings, FiMessageSquare, FiDatabase } from "react-icons/fi";
 
 const Overview = () => {
+  const featureCards = [
+    {
+      icon: (
+        <svg
+          stroke="currentColor"
+          fill="none"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mb-3"
+          height="40"
+          width="40"
+          style={{ color: "#0d6efd" }} // primary blue
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      ),
+      title: "Dual Chatbots",
+      text: (
+        <>
+          Get real-time help with a <b>General Chatbot</b> for coding & queries, and a <b>Project Chatbot</b> for role-based project details.
+        </>
+      ),
+    },
+    {
+      icon: (
+        <svg
+          stroke="currentColor"
+          fill="none"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mb-3"
+          height="40"
+          width="40"
+          style={{ color: "#198754" }} // success green
+        >
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      ),
+      title: "Role-Based Access",
+      text: (
+        <>
+          Admins & HR can manage projects and tasks, while employees view only their assigned work securely.
+        </>
+      ),
+    },
+    {
+      icon: (
+        <svg
+          stroke="currentColor"
+          fill="none"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mb-3"
+          height="40"
+          width="40"
+          style={{ color: "#ffc107" }} // warning yellow
+        >
+          <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+        </svg>
+      ),
+      title: "Project Management",
+      text: (
+        <>
+          Submit new projects, track deadlines, and view data in <b>table or card view</b> for better decisions.
+        </>
+      ),
+    },
+    {
+      icon: (
+        <svg
+          stroke="currentColor"
+          fill="none"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mb-3"
+          height="40"
+          width="40"
+          style={{ color: "#dc3545" }} // danger red
+        >
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      ),
+      title: "Personalization",
+      text: (
+        <>
+          Customize your profile, switch between <b>light & dark themes</b>, and get a tailored workspace experience.
+        </>
+      ),
+    },
+  ];
+
   return (
     <Container
       fluid
@@ -19,7 +123,7 @@ const Overview = () => {
             className="fw-bold"
             style={{
               fontSize: "3rem",
-              background: "linear-gradient(90deg,#007bff,#00c6ff,#6f42c1)",
+              background: "linear-gradient(135deg, #A80C4C, #090939, #421256, #531C9B)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -42,53 +146,10 @@ const Overview = () => {
 
       {/* Feature Cards */}
       <Row className="g-4">
-        {[
-          {
-            icon: <FiMessageSquare size={40} className="text-primary mb-3" />,
-            title: "Dual Chatbots",
-            text: (
-              <>
-                Get real-time help with a <b>General Chatbot</b> for coding &
-                queries, and a <b>Project Chatbot</b> for role-based project
-                details.
-              </>
-            ),
-          },
-          {
-            icon: <FiUsers size={40} className="text-success mb-3" />,
-            title: "Role-Based Access",
-            text: (
-              <>
-                Admins & HR can manage projects and tasks, while employees view
-                only their assigned work securely.
-              </>
-            ),
-          },
-          {
-            icon: <FiDatabase size={40} className="text-warning mb-3" />,
-            title: "Project Management",
-            text: (
-              <>
-                Submit new projects, track deadlines, and view data in{" "}
-                <b>table or card view</b> for better decisions.
-              </>
-            ),
-          },
-          {
-            icon: <FiSettings size={40} className="text-danger mb-3" />,
-            title: "Personalization",
-            text: (
-              <>
-                Customize your profile, switch between{" "}
-                <b>light & dark themes</b>, and get a tailored workspace
-                experience.
-              </>
-            ),
-          },
-        ].map((card, idx) => (
+        {featureCards.map((card, idx) => (
           <Col md={6} lg={3} key={idx}>
             <Card
-              className="h-100 shadow-sm"
+              className="h-100 shadow-sm text-center"
               style={{
                 borderRadius: "20px",
                 border: "none",
@@ -105,12 +166,14 @@ const Overview = () => {
                 (e.currentTarget.style.transform = "translateY(0) scale(1)")
               }
             >
-              <Card.Body className="text-center">
+              <Card.Body className="d-flex flex-column align-items-center justify-content-center">
                 {card.icon}
                 <Card.Title style={{ fontWeight: "700", fontSize: "1.3rem" }}>
                   {card.title}
                 </Card.Title>
-                <Card.Text style={{ color: "#444" }}>{card.text}</Card.Text>
+                <Card.Text style={{ color: "#444", textAlign: "center" }}>
+                  {card.text}
+                </Card.Text>
               </Card.Body>
             </Card>
           </Col>
@@ -139,7 +202,7 @@ const Overview = () => {
               padding: "1rem 3rem",
               fontWeight: "600",
               background:
-                "linear-gradient(90deg,#007bff,#00c6ff,#6f42c1)",
+                "linear-gradient(135deg, #A80C4C, #090939, #421256, #531C9B)",
               border: "none",
               transition: "all 0.4s ease",
             }}
