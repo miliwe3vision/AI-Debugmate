@@ -60,13 +60,13 @@ header button.rounded-circle svg{width: 30px; height: 30px; color: #000; transit
 
 .main .sidebarwrapper .sidebar ul{padding-left: 0px;margin-left: 8px;margin-bottom: 0px;}
 .main .sidebarwrapper .sidebar ul li{margin-bottom: 0px; list-style: none;}
-.main .sidebarwrapper .sidebar ul li button{width: 100%; text-align: left; justify-content: flex-start;align-items: center;margin-top: 10px; border-radius: 0px; background: transparent; border: none; outline: none; box-shadow: none; font-size: 15px; font-weight: 600; color: #000; transition: all 0.3s ease-in-out;justify-content: space-around;}
+.main .sidebarwrapper .sidebar ul li button{width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-radius: 0px; background: transparent; border: none; outline: none; box-shadow: none; font-size: 15px; font-weight: 600; color: #000; transition: all 0.3s ease-in-out;}
 .main .sidebarwrapper .sidebar ul li button:hover{background: linear-gradient(135deg, #A80C4C, #090939, #421256, #531C9B); color: #fff;border-radius: 5px;height: 50px;}
 .main .sidebarwrapper .sidebar ul li button.active{background: linear-gradient(135deg, #A80C4C, #090939, #421256, #531C9B); color: #fff;border-radius: 5px;height: 50px;}
-.main .sidebarwrapper .sidebar ul li button .text{margin-left: 10px;margin-top: 10px;}
+.main .sidebarwrapper .sidebar ul li button .text{margin-left: 10px;margin-top: 0px; flex: 1;}
 .main .sidebarwrapper .sidebar ul li button .icon{width: 20px; height: 20px; border-radius: 50%;display: inline-block;margin-right: 10px;justify-content: center;align-items: center;}
 .main .sidebarwrapper .sidebar ul li button .icon svg{width: 100%; height: 100%;opacity: 0.7;font-size: 16px  ;}
-.main .sidebarwrapper .sidebar ul li button .arrow{width: 20px; height: 20px; border-radius: 50%;display: inline-block;margin-left: auto;justify-content: center;align-items: center;transition: all 0.3s ease-in-out;}
+.main .sidebarwrapper .sidebar ul li button .arrow{width: 20px; height: 20px; border-radius: 50%;display: inline-block;justify-content: center;align-items: center;transition: all 0.3s ease-in-out;}
 .main .sidebarwrapper .sidebar ul li button .arrow svg{width: 100%; height: 100%;font-size: 16px;opacity: 0.7;}
 
 .main .sidebarwrapper .sidebar ul .sub-menu{padding: 10px 45px 0px 45px;transition: all 0.3s ease-in-out;}
@@ -75,7 +75,7 @@ header button.rounded-circle svg{width: 30px; height: 30px; color: #000; transit
 .main .sidebarwrapper .sidebar ul .sub-menu li a:hover{border-radius: 5px;padding: 5px 10px;width: 100%;}
 .main .sidebarwrapper .sidebar ul .sub-menu li a .icon{width: 20px; height: 20px; border-radius: 50%;display: inline-block;margin-right: 10px;justify-content: center;align-items: center;}
 .main .sidebarwrapper .sidebar ul .sub-menu li a .icon svg{width: 100%; height: 100%;opacity: 0.7;font-size: 16px  ;}
-.main .sidebarwrapper .sidebar ul .sub-menu li a .text{margin-left: 10px;margin-top: 10px;}
+.main .sidebarwrapper .sidebar ul .sub-menu li a .text{margin-left: 10px;margin-top: 0px;}
 .main .sidebarwrapper .sidebar ul .sub-menu li a .arrow{width: 20px; height: 20px; border-radius: 50%;display: inline-block;margin-left: auto;justify-content: center;align-items: center;transition: all 0.3s ease-in-out;}
 .main .sidebarwrapper .sidebar ul .sub-menu li a .arrow svg{width: 100%; height: 100%;font-size: 16px;opacity: 0.7;}
 .main .sidebarwrapper .sidebar ul li button.active .arrow1{transform: rotate(90deg);}
@@ -266,4 +266,78 @@ body[data-theme="dark"], body.dark {
 /* Utility to apply dark gradient surface for hero cards */
 .gradient-surface {
   background: radial-gradient(120% 120% at -10% -10%, rgba(124, 58, 237, 0.45) 0%, rgba(67, 56, 202, 0.35) 40%, rgba(2, 6, 23, 0.6) 100%);
+}
+
+/* Notification Badge Styles */
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  animation: pulse 2s infinite;
+}
+
+.notification-badge.pulse {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+  }
+}
+
+/* Dark mode notification badge */
+body.dark .notification-badge {
+  background: #ff4757;
+  border-color: #2c2c2c;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Notification button container */
+.notification-button-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Hover effect for notification button */
+.notification-button-container:hover .notification-badge {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+/* Notification button styling */
+.notification-button {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.notification-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: scale(1.05);
+}
+
+body.dark .notification-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
